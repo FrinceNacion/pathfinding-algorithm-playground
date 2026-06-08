@@ -35,6 +35,19 @@ export default function PathfindingCanvas({ style }) {
   const [tool, setTool] = useState("draw-walls");
   const [speed, setSpeed] = useState("normal");
 
+  // clear all walls from the grid
+  const clearWalls = () => {
+    const grid = grid_ref.current;
+    for (let rows = 0; rows < ROWS; rows++) {
+      for (let columns = 0; columns < COLS; columns++) {
+        if (grid[rows][columns] === WALL) {
+          grid[rows][columns] = EMPTY;
+        }
+      }
+    }
+    draw();
+  };
+
   const draw = useCallback(() => {
     const canvas = canvas_ref.current;
     if (!canvas) return;
@@ -45,10 +58,10 @@ export default function PathfindingCanvas({ style }) {
     canvas_rendering_context.clearRect(0, 0, canvas.width, canvas.height);
 
     // Cells
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        canvas_rendering_context.fillStyle = COLORS[grid[r][c]];
-        canvas_rendering_context.fillRect(c * width + 0.5, r * height + 0.5, width - 1, height - 1);
+    for (let rows = 0; rows < ROWS; rows++) {
+      for (let columns = 0; columns < COLS; columns++) {
+        canvas_rendering_context.fillStyle = COLORS[grid[rows][columns]];
+        canvas_rendering_context.fillRect(columns * width + 0.5, rows * height + 0.5, width - 1, height - 1);
       }
     }
 
@@ -96,6 +109,7 @@ export default function PathfindingCanvas({ style }) {
     return () => resize_observer.disconnect();
   }, [draw]);
 
+  // helper to get cell coordinates from mouse event
   const cellFromEvent = (event) => {
     const rect = canvas_ref.current.getBoundingClientRect();
     const scaleX = canvas_ref.current.width / rect.width;
@@ -123,18 +137,18 @@ export default function PathfindingCanvas({ style }) {
       draw();
     } else if (tool === "move-start") {
       // move start immediately and begin dragging
-      const prev = start;
+      const previous_start_coordinate = start;
       if (row === end.row && col === end.col) return;
-      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[previous_start_coordinate.row][previous_start_coordinate.col] = EMPTY;
       grid_ref.current[row][col] = START;
       setStart({ row, col });
       draw();
       painting.current = "move-start"; // special marker to enable dragging
     } else if (tool === "move-end") {
-      const prev = end;
+      const previous_end_coordinate = end;
       if (row === start.row && col === start.col) return;
-      grid_ref.current[prev.row][prev.col] = EMPTY;
-      grid_ref.current[row][col] = END;
+      grid_ref.current[previous_end_coordinate.row][previous_end_coordinate.col] = EMPTY; // remove old end
+      grid_ref.current[row][col] = END; // set new end
       setEnd({ row, col });
       draw();
       painting.current = "move-end";
@@ -154,16 +168,16 @@ export default function PathfindingCanvas({ style }) {
       draw();
     } else if (painting.current === "move-start") {
       // update start while dragging
-      const prev = start;
+      const previous_start_coordinate = start;
       if (row === end.row && col === end.col) return;
-      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[previous_start_coordinate.row][previous_start_coordinate.col] = EMPTY;
       grid_ref.current[row][col] = START;
       setStart({ row, col });
       draw();
     } else if (painting.current === "move-end") {
-      const prev = end;
+      const previous_end_coordinate = end;
       if (row === start.row && col === start.col) return;
-      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[previous_end_coordinate.row][previous_end_coordinate.col] = EMPTY;
       grid_ref.current[row][col] = END;
       setEnd({ row, col });
       draw();
@@ -183,6 +197,7 @@ export default function PathfindingCanvas({ style }) {
         onToolChange={setTool}
         speed={speed}
         onSpeedChange={setSpeed}
+        onEraseWalls={clearWalls}
       />
       <canvas
         ref={canvas_ref}
