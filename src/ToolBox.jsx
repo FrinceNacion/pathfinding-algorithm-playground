@@ -1,13 +1,22 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Menu } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Eraser, ChevronUp, Menu } from 'lucide-react';
+import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 export default function ToolBox({
     algorithm,
     onAlgorithmChange,
     tool, onToolChange,
-    speed, onSpeedChange
+    speed, onSpeedChange,
+    onEraseWalls
 }) {
     const [isMinimized, setIsMinimized] = useState(false);
+
+    useEffect(() => {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        console.log("Initialized tooltips");
+    }, []);
+    
 
     return (
         <div
@@ -47,19 +56,31 @@ export default function ToolBox({
                         </select>
                     </div>
 
-                    <div>
+                    <div className="d-flex flex-column">
                         <label className="form-label mb-2" style={{ fontSize: "0.875rem", fontWeight: "600" }}>
                             Tool
                         </label>
-                        <select
-                            className="form-select form-select-sm"
-                            value={tool}
-                            onChange={(event) => onToolChange(event.target.value)}
-                        >
-                            <option value="draw-walls">Draw Walls</option>
-                            <option value="move-start">Move Start</option>
-                            <option value="move-end">Move End</option>
-                        </select>
+                        <div className="d-flex flex-row gap-2">
+                            <select
+                                className="form-select form-select-sm"
+                                value={tool}
+                                onChange={(event) => onToolChange(event.target.value)}
+                            >
+                                <option value="draw-walls">Draw Walls</option>
+                                <option value="move-start">Move Start</option>
+                                <option value="move-end">Move End</option>
+                            </select>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => onEraseWalls()}
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                data-bs-title="Clear walls"
+                            >
+                                <Eraser />
+                            </button>
+                        </div>
                     </div>
 
                     <div>
