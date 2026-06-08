@@ -1,0 +1,197 @@
+import { useEffect, useRef, useState, useCallback } from "react";
+import ToolBox from "./ToolBox.jsx";
+
+const COLS = 40;
+const ROWS = 22;
+const EMPTY = 0, WALL = 1, START = 2, END = 3, VISITED = 4, PATH = 5;
+
+const COLORS = {
+  [EMPTY]: "#f8f9fa",
+  [WALL]: "#0f3c65", // #475569 #2b323f #0f3c65
+  [START]: "#22c55e",
+  [END]: "#ef4444", // #9a0002
+  [VISITED]: "#bfdbfe",
+  [PATH]: "#fbbf24",
+};
+
+function createGrid() {
+  const grid = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+  grid[12][4] = START;
+  grid[12][35] = END;
+  return grid;
+}
+
+export default function PathfindingCanvas({ style }) {
+  const canvas_ref = useRef(null);
+  const grid_ref = useRef(createGrid());
+  const cell_size = useRef({ width: 0, height: 0 });
+  const painting = useRef(false);
+  const paint_value = useRef(WALL);
+
+  const [start, setStart] = useState({ row: 12, col: 4 });
+  const [end, setEnd] = useState({ row: 12, col: 35 });
+
+  const [algorithm, setAlgorithm] = useState("BFS");
+  const [tool, setTool] = useState("draw-walls");
+  const [speed, setSpeed] = useState("normal");
+
+  const draw = useCallback(() => {
+    const canvas = canvas_ref.current;
+    if (!canvas) return;
+    const canvas_rendering_context = canvas.getContext("2d");
+    const { width, height } = cell_size.current;
+    const grid = grid_ref.current;
+
+    canvas_rendering_context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Cells
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        canvas_rendering_context.fillStyle = COLORS[grid[r][c]];
+        canvas_rendering_context.fillRect(c * width + 0.5, r * height + 0.5, width - 1, height - 1);
+      }
+    }
+
+    // Grid lines
+    canvas_rendering_context.strokeStyle = "rgba(0,0,0,0.06)"; // "rgba(0,0,0,0.06)"
+    canvas_rendering_context.lineWidth = 0.5;
+    for (let columns = 0; columns <= COLS; columns++) {
+      canvas_rendering_context.beginPath();
+      canvas_rendering_context.moveTo(columns * width, 0);
+      canvas_rendering_context.lineTo(columns * width, canvas.height);
+      canvas_rendering_context.stroke();
+    }
+    for (let rows = 0; rows <= ROWS; rows++) {
+      canvas_rendering_context.beginPath();
+      canvas_rendering_context.moveTo(0, rows * height);
+      canvas_rendering_context.lineTo(canvas.width, rows * height);
+      canvas_rendering_context.stroke();
+    }
+
+    const drawLabel = (row, col, label) => {
+      canvas_rendering_context.fillStyle = "#fff";
+      canvas_rendering_context.font = `bold ${Math.round(height * 0.6)}px sans-serif`;
+      canvas_rendering_context.textAlign = "center";
+      canvas_rendering_context.textBaseline = "middle";
+      canvas_rendering_context.fillText(label, col * width + width / 2, row * height + height / 2);
+    };
+    drawLabel(start.row, start.col, "S");
+    drawLabel(end.row, end.col, "E");
+  }, [start, end]);
+
+  // resize canvas to fit parent and calculate cell size
+  useEffect(() => {
+    const canvas = canvas_ref.current;
+    const resize = () => {
+      const width = canvas.parentElement.clientWidth;
+      const height = Math.round(width * ROWS / COLS);
+      canvas.width = width;
+      canvas.height = height;
+      cell_size.current = { width: width / COLS, height: height / ROWS }; // cleanup, calculate cell size only on resize
+      draw();
+    };
+    resize();
+    const resize_observer = new ResizeObserver(resize);
+    resize_observer.observe(canvas.parentElement);
+    return () => resize_observer.disconnect();
+  }, [draw]);
+
+  const cellFromEvent = (event) => {
+    const rect = canvas_ref.current.getBoundingClientRect();
+    const scaleX = canvas_ref.current.width / rect.width;
+    const scaleY = canvas_ref.current.height / rect.height;
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+    return {
+      row: Math.floor(y / cell_size.current.height),
+      col: Math.floor(x / cell_size.current.width),
+    };
+  };
+
+  const inBounds = (row, col) => row >= 0 && row < ROWS && col >= 0 && col < COLS;
+
+  const handleMouseDown = (e) => {
+    const { row, col } = cellFromEvent(e);
+    if (!inBounds(row, col)) return;
+
+    if (tool === "draw-walls") {
+      const cell = grid_ref.current[row][col];
+      if (cell === START || cell === END) return;
+      painting.current = true;
+      paint_value.current = cell === WALL ? EMPTY : WALL;
+      grid_ref.current[row][col] = paint_value.current;
+      draw();
+    } else if (tool === "move-start") {
+      // move start immediately and begin dragging
+      const prev = start;
+      if (row === end.row && col === end.col) return;
+      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[row][col] = START;
+      setStart({ row, col });
+      draw();
+      painting.current = "move-start"; // special marker to enable dragging
+    } else if (tool === "move-end") {
+      const prev = end;
+      if (row === start.row && col === start.col) return;
+      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[row][col] = END;
+      setEnd({ row, col });
+      draw();
+      painting.current = "move-end";
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (!painting.current) return;
+    const { row, col } = cellFromEvent(e);
+    if (!inBounds(row, col)) return;
+
+    if (painting.current === true) {
+      // drawing walls mode
+      const cell = grid_ref.current[row][col];
+      if (cell === START || cell === END) return;
+      grid_ref.current[row][col] = paint_value.current;
+      draw();
+    } else if (painting.current === "move-start") {
+      // update start while dragging
+      const prev = start;
+      if (row === end.row && col === end.col) return;
+      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[row][col] = START;
+      setStart({ row, col });
+      draw();
+    } else if (painting.current === "move-end") {
+      const prev = end;
+      if (row === start.row && col === start.col) return;
+      grid_ref.current[prev.row][prev.col] = EMPTY;
+      grid_ref.current[row][col] = END;
+      setEnd({ row, col });
+      draw();
+    }
+  };
+
+  const handleMouseUp = () => {
+    painting.current = false;
+  };
+
+  return (
+    <div style={style}>
+      <ToolBox
+        algorithm={algorithm}
+        onAlgorithmChange={setAlgorithm}
+        tool={tool}
+        onToolChange={setTool}
+        speed={speed}
+        onSpeedChange={setSpeed}
+      />
+      <canvas
+        ref={canvas_ref}
+        style={{ display: "block", width: "100%", cursor: "crosshair" }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      />
+    </div>
+  );
+}
