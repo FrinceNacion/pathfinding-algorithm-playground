@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ToolBox from "./ToolBox.jsx";
 import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, COLORS, createGrid } from "./canvas-config.js";
+import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll } from "./canvas-service.js";
 
 export default function PathfindingCanvas({ style }) {
   const canvas_ref = useRef(null);
@@ -30,47 +31,7 @@ export default function PathfindingCanvas({ style }) {
   };
 
   const draw = useCallback(() => {
-    const canvas = canvas_ref.current;
-    if (!canvas) return;
-    const canvas_rendering_context = canvas.getContext("2d");
-    const { width, height } = cell_size.current;
-    const grid = grid_ref.current;
-
-    canvas_rendering_context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Cells
-    for (let rows = 0; rows < ROWS; rows++) {
-      for (let columns = 0; columns < COLS; columns++) {
-        canvas_rendering_context.fillStyle = COLORS[grid[rows][columns]];
-        canvas_rendering_context.fillRect(columns * width + 0.5, rows * height + 0.5, width - 1, height - 1);
-      }
-    }
-
-    // Grid lines
-    canvas_rendering_context.strokeStyle = "rgba(0,0,0,0.06)"; // "rgba(0,0,0,0.06)"
-    canvas_rendering_context.lineWidth = 0.5;
-    for (let columns = 0; columns <= COLS; columns++) {
-      canvas_rendering_context.beginPath();
-      canvas_rendering_context.moveTo(columns * width, 0);
-      canvas_rendering_context.lineTo(columns * width, canvas.height);
-      canvas_rendering_context.stroke();
-    }
-    for (let rows = 0; rows <= ROWS; rows++) {
-      canvas_rendering_context.beginPath();
-      canvas_rendering_context.moveTo(0, rows * height);
-      canvas_rendering_context.lineTo(canvas.width, rows * height);
-      canvas_rendering_context.stroke();
-    }
-
-    const drawLabel = (row, col, label) => {
-      canvas_rendering_context.fillStyle = "#fff";
-      canvas_rendering_context.font = `bold ${Math.round(height * 0.6)}px sans-serif`;
-      canvas_rendering_context.textAlign = "center";
-      canvas_rendering_context.textBaseline = "middle";
-      canvas_rendering_context.fillText(label, col * width + width / 2, row * height + height / 2);
-    };
-    drawLabel(start.row, start.col, "S");
-    drawLabel(end.row, end.col, "E");
+    drawCanvas(canvas_ref.current, grid_ref.current, cell_size.current, start, end);
   }, [start, end]);
 
   // resize canvas to fit parent and calculate cell size
