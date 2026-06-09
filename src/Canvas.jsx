@@ -9,6 +9,7 @@ export default function PathfindingCanvas({ style }) {
   const cell_size = useRef({ width: 0, height: 0 });
   const painting = useRef(false);
   const paint_value = useRef(WALL);
+  const running = useRef(false);
 
   const [start, setStart] = useState({ row: 12, col: 4 });
   const [end, setEnd] = useState({ row: 12, col: 35 });
@@ -18,17 +19,15 @@ export default function PathfindingCanvas({ style }) {
   const [speed, setSpeed] = useState("normal");
 
   // clear all walls from the grid
-  const clearWalls = () => {
-    const grid = grid_ref.current;
-    for (let rows = 0; rows < ROWS; rows++) {
-      for (let columns = 0; columns < COLS; columns++) {
-        if (grid[rows][columns] === WALL) {
-          grid[rows][columns] = EMPTY;
-        }
-      }
-    }
+  const handleClearWalls = () => {
+    clearWalls(grid_ref.current);
     draw();
   };
+
+  const handleClearAll = () => {
+    clearAll(grid_ref.current, start, end);
+    draw();
+  }
 
   const draw = useCallback(() => {
     drawCanvas(canvas_ref.current, grid_ref.current, cell_size.current, start, end);
@@ -52,7 +51,9 @@ export default function PathfindingCanvas({ style }) {
   }, [draw]);
 
   const handleMouseDown = (e) => {
-    const { row, col } = cellFromEvent(e);
+    if (running.current) return; // prevent editing while algorithm is running
+
+    const { row, col } = cellFromEvent(e, canvas_ref.current, cell_size.current);
     if (!inBounds(row, col)) return;
 
     if (tool === "draw-walls") {
@@ -84,7 +85,7 @@ export default function PathfindingCanvas({ style }) {
 
   const handleMouseMove = (e) => {
     if (!painting.current) return;
-    const { row, col } = cellFromEvent(e);
+    const { row, col } = cellFromEvent(e, canvas_ref.current, cell_size.current);
     if (!inBounds(row, col)) return;
 
     if (painting.current === true) {
