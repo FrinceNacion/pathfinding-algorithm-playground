@@ -51,21 +51,6 @@ export default function PathfindingCanvas({ style }) {
     return () => resize_observer.disconnect();
   }, [draw]);
 
-  // helper to get cell coordinates from mouse event
-  const cellFromEvent = (event) => {
-    const rect = canvas_ref.current.getBoundingClientRect();
-    const scaleX = canvas_ref.current.width / rect.width;
-    const scaleY = canvas_ref.current.height / rect.height;
-    const x = (event.clientX - rect.left) * scaleX;
-    const y = (event.clientY - rect.top) * scaleY;
-    return {
-      row: Math.floor(y / cell_size.current.height),
-      col: Math.floor(x / cell_size.current.width),
-    };
-  };
-
-  const inBounds = (row, col) => row >= 0 && row < ROWS && col >= 0 && col < COLS;
-
   const handleMouseDown = (e) => {
     const { row, col } = cellFromEvent(e);
     if (!inBounds(row, col)) return;
