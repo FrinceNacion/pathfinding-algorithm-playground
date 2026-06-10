@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ToolBox from "./ToolBox.jsx";
-import { breadthFirstSearch } from "./algorithms-service.js";
+import { breadthFirstSearch, depthFirstSearch } from "./algorithms-service.js";
 import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, COLORS, createGrid } from "./canvas-config.js";
 import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll } from "./canvas-service.js";
 
@@ -117,35 +117,44 @@ export default function PathfindingCanvas({ style }) {
     painting.current = false;
   };
 
+  const renderStepsAndPath = (steps, path, grid) => {
+    let delay = 6000;
+    // render visited cells
+    setInterval(() => {
+      if (steps.length === 0) return;
+      const [row, col] = steps.shift();
+      if (grid[row][col] !== START && grid[row][col] !== END) {
+        grid[row][col] = VISITED;
+        draw();
+      }
+    }, delay / steps.length);
+
+    setInterval(() => {
+      if (steps.length > 0) return;
+      if (path.length === 0) return;
+      const [row, col] = path.shift().split(",").map(Number);
+      if (grid[row][col] !== START && grid[row][col] !== END) {
+        grid[row][col] = PATH;
+        draw();
+      }
+    }, delay / path.length);
+  }
+
   const handleRun = () => {
     if (running.current) return;
     running.current = true;
+    const grid = grid_ref.current;
 
     if (algorithm === "BFS") {
-      console.log("Asdasd");
-      const [steps, path] = breadthFirstSearch(grid_ref.current, start, end);
-      const grid = grid_ref.current;
-      let delay = 6000;
+      const [steps, path] = breadthFirstSearch(grid, start, end);
 
-      // render visited cells
-      setInterval(() => {
-        if (steps.length === 0) return;
-        const [row, col] = steps.shift();
-        if (grid[row][col] !== START && grid[row][col] !== END) {
-          grid[row][col] = VISITED;
-          draw();
-        }
-      }, delay / steps.length);
+      renderStepsAndPath(steps, path, grid);
 
-      setInterval(() => {
-        if (steps.length > 0) return;
-        if (path.length === 0) return;
-        const [row, col] = path.shift().split(",").map(Number);
-        if (grid[row][col] !== START && grid[row][col] !== END) {
-          grid[row][col] = PATH;
-          draw();
-        }
-      }, delay / path.length);
+      running.current = false;
+    } else if (algorithm === "DFS") {
+      const [steps, path] = depthFirstSearch(grid, start, end);
+      
+      renderStepsAndPath(steps, path, grid);
 
       running.current = false;
     }
