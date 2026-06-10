@@ -10,8 +10,19 @@ const getNeighbors = (row, col, grid) => {
     return neighbors;
 }
 
+// reconstruct path from end to start using the prev map
+const reconstructPath = (prev, end) => {
+    const path = [];
+    let current = `${end.row},${end.col}`; // backtrack from end
+    while (prev[current]) {
+        path.push(current);
+        current = prev[current];
+    }
+    return path;
+}
+
 const breadthFirstSearch = (grid, start, end) => {
-    const steps = [];
+    const steps = [], prev = {};
     const visited = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
     visited[start.row][start.col] = true;
     const queue = [[start.row, start.col]];
@@ -19,20 +30,25 @@ const breadthFirstSearch = (grid, start, end) => {
     while (queue.length > 0) {
         const [row, col] = queue.shift();
         if (row === end.row && col === end.col) { 
-            console.log("End found!");
+            //console.log(`Reached end at (${row}, ${col}). End coordinates: (${end.row}, ${end.col})`);
             break; 
-        } // found end;
+        }
+
         const neighbors = getNeighbors(row, col, grid);
         for (const [nRow, nCol] of neighbors) {
-            console.log(`Checking neighbor: (${nRow}, ${nCol})`);
             if (visited[nRow][nCol]) { continue } // skip if visited
             visited[nRow][nCol] = true;
             steps.push([nRow, nCol]);
+            prev[`${nRow},${nCol}`] = `${row},${col}`;
             queue.push([nRow, nCol]);
         }
     }
 
-    return steps;
+    //console.log("Steps taken:", steps);
+    //console.log("Previous map:", prev);
+    const path = reconstructPath(prev, end);
+
+    return [steps, path];
 };
 
 export { breadthFirstSearch };
