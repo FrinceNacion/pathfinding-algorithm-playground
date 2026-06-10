@@ -3,11 +3,11 @@ import { Eraser, ChevronUp, Menu } from 'lucide-react';
 import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 export default function ToolBox({
-    algorithm,
-    onAlgorithmChange,
+    grid, start, end,
+    algorithm, onAlgorithmChange,
     tool, onToolChange,
     speed, onSpeedChange,
-    onEraseWalls
+    onEraseWalls, onRun, onReset
 }) {
     const [isMinimized, setIsMinimized] = useState(false);
 
@@ -99,8 +99,8 @@ export default function ToolBox({
                     </div>
 
                     <div className="d-flex gap-2">
-                        <button className="btn btn-primary btn-sm flex-grow-1">Run</button>
-                        <button className="btn btn-secondary btn-sm flex-grow-1">Reset</button>
+                        <button className="btn btn-primary btn-sm flex-grow-1" onClick={() => onRun(grid, start, end)}>Run</button>
+                        <button className="btn btn-secondary btn-sm flex-grow-1" onClick={() => onReset()}>Reset</button>
                     </div>
                 </>
             )}
