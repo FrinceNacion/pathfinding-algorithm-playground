@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import ToolBox from "./ToolBox.jsx";
 import { breadthFirstSearch, depthFirstSearch } from "./algorithms-service.js";
 import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, COLORS, createGrid } from "./canvas-config.js";
-import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll } from "./canvas-service.js";
+import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll, clearVisited } from "./canvas-service.js";
 
 export default function PathfindingCanvas({ style }) {
   const canvas_ref = useRef(null);
@@ -25,10 +25,15 @@ export default function PathfindingCanvas({ style }) {
     draw();
   };
 
+  const handleClearPath = () => {
+    clearVisited(grid_ref.current);
+    draw();
+  };
+
   const handleClearAll = () => {
     clearAll(grid_ref.current, start, end);
     draw();
-  }
+  };
 
   const draw = useCallback(() => {
     drawCanvas(canvas_ref.current, grid_ref.current, cell_size.current, start, end);
@@ -170,6 +175,7 @@ export default function PathfindingCanvas({ style }) {
         speed={speed}
         onSpeedChange={setSpeed}
         onEraseWalls={handleClearWalls}
+        onClearPath={handleClearPath}
         onRun={handleRun}
         onReset={handleClearAll}
         grid={grid_ref.current}
