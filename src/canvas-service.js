@@ -1,5 +1,5 @@
 import { breadthFirstSearch } from "./algorithms-service.js";
-import { ROWS, START, END, VISITED, COLS, COLORS, WALL, EMPTY } from "./canvas-config.js";
+import { ROWS, START, PATH, END, VISITED, COLS, COLORS, WALL, EMPTY } from "./canvas-config.js";
 
 const inBounds = (row, col) => row >= 0 && row < ROWS && col >= 0 && col < COLS;
 
@@ -16,7 +16,7 @@ const clearWalls = (grid) => {
 const clearVisited = (grid) => {
     for (let rows = 0; rows < ROWS; rows++) {
         for (let columns = 0; columns < COLS; columns++) {
-            if (grid[rows][columns] === VISITED) {
+            if (grid[rows][columns] === VISITED || grid[rows][columns] === PATH) {
                 grid[rows][columns] = EMPTY;
             }
         }
