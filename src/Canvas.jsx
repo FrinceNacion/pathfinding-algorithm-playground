@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ToolBox from "./ToolBox.jsx";
+import { breadthFirstSearch } from "./algorithms-service.js";
 import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, COLORS, createGrid } from "./canvas-config.js";
 import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll } from "./canvas-service.js";
 
@@ -116,6 +117,40 @@ export default function PathfindingCanvas({ style }) {
     painting.current = false;
   };
 
+  const handleRun = () => {
+    if (running.current) return;
+    running.current = true;
+
+    if (algorithm === "BFS") {
+      console.log("Asdasd");
+      const [steps, path] = breadthFirstSearch(grid_ref.current, start, end);
+      const grid = grid_ref.current;
+      let delay = 6000;
+
+      // render visited cells
+      setInterval(() => {
+        if (steps.length === 0) return;
+        const [row, col] = steps.shift();
+        if (grid[row][col] !== START && grid[row][col] !== END) {
+          grid[row][col] = VISITED;
+          draw();
+        }
+      }, delay / steps.length);
+
+      setInterval(() => {
+        if (steps.length > 0) return;
+        if (path.length === 0) return;
+        const [row, col] = path.shift().split(",").map(Number);
+        if (grid[row][col] !== START && grid[row][col] !== END) {
+          grid[row][col] = PATH;
+          draw();
+        }
+      }, delay / path.length);
+
+      running.current = false;
+    }
+  }
+
   return (
     <div style={style}>
       <ToolBox
@@ -125,7 +160,12 @@ export default function PathfindingCanvas({ style }) {
         onToolChange={setTool}
         speed={speed}
         onSpeedChange={setSpeed}
-        onEraseWalls={clearWalls}
+        onEraseWalls={handleClearWalls}
+        onRun={handleRun}
+        onReset={handleClearAll}
+        grid={grid_ref.current}
+        start={start}
+        end={end}
       />
       <canvas
         ref={canvas_ref}
