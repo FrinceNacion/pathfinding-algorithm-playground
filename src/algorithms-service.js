@@ -29,9 +29,9 @@ const breadthFirstSearch = (grid, start, end) => {
 
     while (queue.length > 0) {
         const [row, col] = queue.shift();
-        if (row === end.row && col === end.col) { 
+        if (row === end.row && col === end.col) {
             //console.log(`Reached end at (${row}, ${col}). End coordinates: (${end.row}, ${end.col})`);
-            break; 
+            break;
         }
 
         const neighbors = getNeighbors(row, col, grid);
@@ -51,4 +51,32 @@ const breadthFirstSearch = (grid, start, end) => {
     return [steps, path];
 };
 
-export { breadthFirstSearch };
+const depthFirstSearch = (grid, start, end) => {
+    //console.log("DFS called with start:", start, "end:", end);
+    const steps = [], prev = {};
+    const visited = Array.from({ length: ROWS }, () => Array(COLS).fill(false));
+    visited[start.row][start.col] = true;
+    const stack = [[start.row, start.col]];
+
+    while (stack.length > 0) {
+        const [row, col] = stack.pop();
+        if (row === end.row && col === end.col) {
+            break;
+        }
+
+        const neighbors = getNeighbors(row, col, grid);
+        for (const [nRow, nCol] of neighbors) {
+            if (visited[nRow][nCol]) { continue } // skip if visited
+            visited[nRow][nCol] = true;
+            steps.push([nRow, nCol]);
+            prev[`${nRow},${nCol}`] = `${row},${col}`;
+            stack.push([nRow, nCol]);
+        }
+    }
+
+    const path = reconstructPath(prev, end);
+    
+    return [steps, path];
+}
+
+export { breadthFirstSearch, depthFirstSearch };
