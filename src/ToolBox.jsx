@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eraser, ChevronUp, Menu } from 'lucide-react';
+import { Eraser, ChevronUp, Menu, RouteOff } from 'lucide-react';
 import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 export default function ToolBox({
@@ -7,7 +7,7 @@ export default function ToolBox({
     algorithm, onAlgorithmChange,
     tool, onToolChange,
     speed, onSpeedChange,
-    onEraseWalls, onRun, onReset
+    onEraseWalls, onClearPath, onRun, onReset,
 }) {
     const [isMinimized, setIsMinimized] = useState(false);
 
@@ -79,6 +79,16 @@ export default function ToolBox({
                                 data-bs-title="Clear walls"
                             >
                                 <Eraser />
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => onClearPath()}
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                data-bs-title="Clear visited"
+                            >
+                                <RouteOff />
                             </button>
                         </div>
                     </div>
