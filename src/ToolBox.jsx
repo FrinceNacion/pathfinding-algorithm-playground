@@ -49,10 +49,10 @@ export default function ToolBox({
                             value={algorithm}
                             onChange={(event) => onAlgorithmChange(event.target.value)}
                         >
-                            <option value="bfs">BFS</option>
-                            <option value="dfs">DFS</option>
-                            <option value="dijkstra">Dijkstra</option>
-                            <option value="astar">A*</option>
+                            <option value="BFS">BFS</option>
+                            <option value="DFS">DFS</option>
+                            <option value="Dijkstra">Dijkstra</option>
+                            <option value="A*">A*</option>
                         </select>
                     </div>
 
