@@ -21,16 +21,19 @@ export default function PathfindingCanvas({ style }) {
 
   // clear all walls from the grid
   const handleClearWalls = () => {
+    if (running.current) return;
     clearWalls(grid_ref.current);
     draw();
   };
 
   const handleClearPath = () => {
+    if (running.current) return;
     clearVisited(grid_ref.current);
     draw();
   };
 
   const handleClearAll = () => {
+    if (running.current) return;
     clearAll(grid_ref.current, start, end);
     draw();
   };
@@ -122,11 +125,14 @@ export default function PathfindingCanvas({ style }) {
     painting.current = false;
   };
 
-  const renderStepsAndPath = (steps, path, grid) => {
+  const visualizeAlgorithm = (steps, path, grid) => {
     let delay = 6000;
-    // render visited cells
-    setInterval(() => {
-      if (steps.length === 0) return;
+
+    const renderVisited = setInterval(() => {
+      if (steps.length === 0) {
+        clearInterval(renderVisited);
+        return;
+      };
       const [row, col] = steps.shift();
       if (grid[row][col] !== START && grid[row][col] !== END) {
         grid[row][col] = VISITED;
@@ -134,9 +140,18 @@ export default function PathfindingCanvas({ style }) {
       }
     }, delay / steps.length);
 
-    setInterval(() => {
+    if (path.length  === 0){
+      running.current = false;
+      return;
+    }
+
+    const renderPath = setInterval(() => {
       if (steps.length > 0) return;
-      if (path.length === 0) return;
+      if (path.length === 0 || path === []) {
+        clearInterval(renderPath);
+        running.current = false;
+        return;
+      };
       const [row, col] = path.shift().split(",").map(Number);
       if (grid[row][col] !== START && grid[row][col] !== END) {
         grid[row][col] = PATH;
@@ -153,15 +168,11 @@ export default function PathfindingCanvas({ style }) {
     if (algorithm === "BFS") {
       const [steps, path] = breadthFirstSearch(grid, start, end);
 
-      renderStepsAndPath(steps, path, grid);
-
-      running.current = false;
+      visualizeAlgorithm(steps, path, grid);
     } else if (algorithm === "DFS") {
       const [steps, path] = depthFirstSearch(grid, start, end);
       
-      renderStepsAndPath(steps, path, grid);
-
-      running.current = false;
+      visualizeAlgorithm(steps, path, grid);
     }
   }
 
