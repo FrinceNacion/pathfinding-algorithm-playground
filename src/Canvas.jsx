@@ -59,10 +59,10 @@ export default function PathfindingCanvas({ style }) {
     return () => resize_observer.disconnect();
   }, [draw]);
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (event) => {
     if (running.current) return; // prevent editing while algorithm is running
 
-    const { row, col } = cellFromEvent(e, canvas_ref.current, cell_size.current);
+    const { row, col } = cellFromEvent(event, canvas_ref.current, cell_size.current);
     if (!inBounds(row, col)) return;
 
     if (tool === "draw-walls") {
@@ -92,9 +92,9 @@ export default function PathfindingCanvas({ style }) {
     }
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (event) => {
     if (!painting.current) return;
-    const { row, col } = cellFromEvent(e, canvas_ref.current, cell_size.current);
+    const { row, col } = cellFromEvent(event, canvas_ref.current, cell_size.current);
     if (!inBounds(row, col)) return;
 
     if (painting.current === true) {
