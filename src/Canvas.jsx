@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import ToolBox from "./ToolBox.jsx";
 import { breadthFirstSearch, depthFirstSearch } from "./algorithms-service.js";
 import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, COLORS, createGrid } from "./canvas-config.js";
+import { END_COORDINATE, START_COORDINATE } from "./canvas-config.js";
 import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll, clearVisited } from "./canvas-service.js";
 
 export default function PathfindingCanvas({ style }) {
@@ -12,8 +13,8 @@ export default function PathfindingCanvas({ style }) {
   const paint_value = useRef(WALL);
   const running = useRef(false);
 
-  const [start, setStart] = useState({ row: 12, col: 4 });
-  const [end, setEnd] = useState({ row: 12, col: 35 });
+  const [start, setStart] = useState(START_COORDINATE);
+  const [end, setEnd] = useState(END_COORDINATE);
 
   const [algorithm, setAlgorithm] = useState("BFS");
   const [tool, setTool] = useState("draw-walls");
@@ -32,9 +33,15 @@ export default function PathfindingCanvas({ style }) {
     draw();
   };
 
-  const handleClearAll = () => {
+  const resetCanvas = () => {
     if (running.current) return;
     clearAll(grid_ref.current, start, end);
+    grid_ref.current[start.row][start.col] = EMPTY;
+    grid_ref.current[end.row][end.col] = EMPTY;
+    grid_ref.current[12][4] = START;
+    grid_ref.current[12][35] = END;
+    setStart(START_COORDINATE);
+    setEnd(END_COORDINATE);
     draw();
   };
 
@@ -188,7 +195,7 @@ export default function PathfindingCanvas({ style }) {
         onEraseWalls={handleClearWalls}
         onClearPath={handleClearPath}
         onRun={handleRun}
-        onReset={handleClearAll}
+        onReset={resetCanvas}
         grid={grid_ref.current}
         start={start}
         end={end}
