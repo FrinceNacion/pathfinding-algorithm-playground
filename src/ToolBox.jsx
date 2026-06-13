@@ -25,7 +25,7 @@ export default function ToolBox({
                 top: "20px",
                 right: "20px",
                 zIndex: 1000,
-                minWidth: "220px",
+                minWidth: "50px",
             }}
         >
             <button
