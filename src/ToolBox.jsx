@@ -51,8 +51,6 @@ export default function ToolBox({
                         >
                             <option value="BFS">BFS</option>
                             <option value="DFS">DFS</option>
-                            <option value="Dijkstra">Dijkstra</option>
-                            <option value="A*">A*</option>
                         </select>
                     </div>
 
