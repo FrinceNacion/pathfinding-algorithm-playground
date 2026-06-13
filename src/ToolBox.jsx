@@ -108,7 +108,7 @@ export default function ToolBox({
 
                     <div className="d-flex gap-2">
                         <button className="btn btn-primary btn-sm flex-grow-1" onClick={() => onRun(grid, start, end)}>Run</button>
-                        <button className="btn btn-secondary btn-sm flex-grow-1" onClick={() => onReset()}>Reset</button>
+                        <button className="btn btn-danger btn-sm flex-grow-1" onClick={() => onReset()}>Reset</button>
                     </div>
                 </>
             )}
