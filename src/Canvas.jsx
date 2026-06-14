@@ -322,30 +322,158 @@ export default function PathfindingCanvas() {
   };
 
   return (
-    <div style={style}>
-      <ToolBox
-        algorithm={algorithm}
-        onAlgorithmChange={setAlgorithm}
-        tool={tool}
-        onToolChange={setTool}
-        speed={speed}
-        onSpeedChange={setSpeed}
-        onEraseWalls={handleClearWalls}
-        onClearPath={handleClearPath}
-        onRun={handleRun}
-        onReset={resetCanvas}
-        grid={grid_ref.current}
-        start={start}
-        end={end}
-      />
-      <canvas
-        ref={canvas_ref}
-        style={{ display: "block", width: "100%", cursor: "crosshair" }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      />
+    <div
+      ref={app_root_ref}
+      className={`app-root ${isFullscreen ? "is-fullscreen" : ""}`}
+    >
+      <div className="workspace-panel" ref={workspace_ref}>
+
+        {/* Workspace top bar */}
+        <header className="workspace-header">
+          <div className="workspace-title">
+            <div className="workspace-title-dot" />
+            Pathfinding Playground
+          </div>
+          <div className="workspace-header-actions">
+            {/* Mobile sidebar toggle */}
+            {showMobileSidebar && (
+              <button
+                className={`btn-icon ${isMobileSidebarOpen ? "active" : ""}`}
+                onClick={() => setIsMobileSidebarOpen(v => !v)}
+                title="Toggle Controls"
+              >
+                {isMobileSidebarOpen ? <PanelRightClose size={15} /> : <PanelRight size={15} />}
+              </button>
+            )}
+            {/* Fullscreen toggle */}
+            <button
+              className={`btn-icon ${isFullscreen ? "active" : ""}`}
+              onClick={handleToggleFullscreen}
+              title={isFullscreen ? "Exit full screen" : "Enter full screen"}
+            >
+              {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+          </div>
+        </header>
+
+        {/* Canvas viewport (scrollable when zoomed) */}
+        <div
+          ref={viewport_ref}
+          className={`canvas-viewport ${zoom <= 1 ? "canvas-fits" : ""}`}
+        >
+          <div
+            className="canvas-zoom-wrapper"
+            style={{ transform: `scale(${zoom})` }}
+          >
+            <canvas
+              ref={canvas_ref}
+              className="canvas-element"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleMouseUp}
+            />
+          </div>
+        </div>
+
+        <div className="viewport-controls">
+          <button className="vc-btn" onClick={handleZoomOut} title="Zoom out (Ctrl + Scroll)">
+            <ZoomOut size={14} />
+          </button>
+          <button
+            className="vc-zoom-label"
+            onClick={handleZoomReset}
+            title="Reset zoom to 100%"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+          >
+            {zoom_percent}
+          </button>
+          <button className="vc-btn" onClick={handleZoomIn} title="Zoom in (Ctrl + Scroll)">
+            <ZoomIn size={14} />
+          </button>
+          <div className="vc-divider" />
+          <button
+            className={`vc-btn ${isFullscreen ? "active" : ""}`}
+            onClick={handleToggleFullscreen}
+            title={isFullscreen ? "Exit full screen" : "Full screen"}
+          >
+            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          </button>
+          {!isMobile && !isFullscreen && (
+            <>
+              <div className="vc-divider" />
+              <button
+                className={`vc-btn ${isSidebarCollapsed ? "active" : ""}`}
+                onClick={() => setIsSidebarCollapsed(v => !v)}
+                title={isSidebarCollapsed ? "Show sidebar" : "Hide sidebar"}
+              >
+                {isSidebarCollapsed ? <SidebarOpen size={14} /> : <SidebarClose size={14} />}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {showSidebar && !isSidebarCollapsed && (
+        <div ref={splitter_ref} className="sidebar-splitter" />
+      )}
+
+      {showSidebar && (
+        <aside
+          className={`sidebar-panel ${isSidebarCollapsed ? "is-collapsed" : ""}`}
+          style={{ width: isSidebarCollapsed ? undefined : `${sidebarWidth}px` }}
+        >
+          <ToolBox
+            {...toolboxProps}
+            isFloating={false}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(v => !v)}
+          />
+        </aside>
+      )}
+
+      {showMobileSidebar && (
+        <aside
+          className={`sidebar-panel ${isMobileSidebarOpen ? "" : "mobile-hidden"}`}
+          style={{ width: "280px" }}
+        >
+          <ToolBox
+            {...toolboxProps}
+            isFloating={false}
+            isCollapsed={false}
+            onToggleCollapse={() => setIsMobileSidebarOpen(false)}
+          />
+        </aside>
+      )}
+
+      {isFullscreen && showFloatingToolbox && (
+        <ToolBox
+          {...toolboxProps}
+          isFloating={true}
+          onClose={() => setShowFloatingToolbox(false)}
+        />
+      )}
+
+      {isFullscreen && !showFloatingToolbox && (
+        <button
+          className="btn-icon active animate-pop-in"
+          style={{
+            position: "fixed",
+            top: "60px",
+            right: "16px",
+            zIndex: 10001,
+            width: "36px",
+            height: "36px",
+          }}
+          onClick={() => setShowFloatingToolbox(true)}
+          title="Show controls"
+        >
+          <PanelRight size={16} />
+        </button>
+      )}
     </div>
   );
 }
