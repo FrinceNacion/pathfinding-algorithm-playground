@@ -37,15 +37,56 @@ export default function ToolBox({
     onToggleCollapse,
     onClose,
 }) {
-    const [isMinimized, setIsMinimized] = useState(false);
+    const [localCollapsed, setLocalCollapsed] = useState(false);
+    const collapsed = isFloating ? localCollapsed : isCollapsed;
+    const toggleCollapse = isFloating
+        ? () => setLocalCollapsed(v => !v)
+        : onToggleCollapse;
 
-    useEffect(() => {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-        console.log("Initialized tooltips");
-    }, []);
-    
+    const speedLabels = { [SPEED.SLOW]: "Slow", [SPEED.NORMAL]: "Normal", [SPEED.FAST]: "Fast" };
+    const speedIndex = [SPEED.SLOW, SPEED.NORMAL, SPEED.FAST].indexOf(Number(speed));
 
+    const handleSpeedSlider = (e) => {
+        const idx = Number(e.target.value);
+        const vals = [SPEED.SLOW, SPEED.NORMAL, SPEED.FAST];
+        onSpeedChange(vals[idx]);
+    };
+
+    if (isFloating) {
+        return (
+            <div className="floating-toolbox animate-pop-in">
+                <div className="floating-toolbox-header">
+                    <span className="floating-toolbox-title">Controls</span>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                        <button
+                            className="btn-icon"
+                            onClick={toggleCollapse}
+                            title={collapsed ? "Expand" : "Collapse"}
+                        >
+                            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                        </button>
+                        {onClose && (
+                            <button className="btn-icon" onClick={onClose} title="Close">
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {!collapsed && <ToolboxBody
+                    algorithm={algorithm} onAlgorithmChange={onAlgorithmChange}
+                    tool={tool} onToolChange={onToolChange}
+                    speed={speed} speedIndex={speedIndex} speedLabels={speedLabels}
+                    onSpeedSlider={handleSpeedSlider}
+                    onEraseWalls={onEraseWalls} onClearPath={onClearPath}
+                    onRun={onRun} onReset={onReset}
+                    gridRef={gridRef} start={start} end={end}
+                />}
+            </div>
+        );
+    }
+
+    // Sidebar mode
     return (
         <div
             className="card position-fixed p-2 d-flex flex-column gap-3"
