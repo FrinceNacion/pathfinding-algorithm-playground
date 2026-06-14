@@ -88,99 +88,159 @@ export default function ToolBox({
 
     // Sidebar mode
     return (
-        <div
-            className="card position-fixed p-2 d-flex flex-column gap-3"
-            style={{
-                top: "20px",
-                right: "20px",
-                zIndex: 1000,
-                minWidth: "50px",
-            }}
-        >
-            <button
-                className="btn btn-link p-0"
-                style={{ fontSize: "1.2rem", color: "#666" }}
-                onClick={() => setIsMinimized(!isMinimized)}
-                title={isMinimized ? "Expand" : "Minimize"}
-            >
-                {isMinimized ? <Menu /> : <ChevronUp />}
-            </button>
-
-            {!isMinimized && (
-                <>
-
-                    <div>
-                        <label className="form-label mb-2" style={{ fontSize: "0.875rem", fontWeight: "600" }}>
-                            Algorithm
-                        </label>
-                        <select
-                            className="form-select form-select-sm"
-                            value={algorithm}
-                            onChange={(event) => onAlgorithmChange(event.target.value)}
-                        >
-                            <option value="BFS">BFS</option>
-                            <option value="DFS">DFS</option>
-                        </select>
-                    </div>
-
-                    <div className="d-flex flex-column">
-                        <label className="form-label mb-2" style={{ fontSize: "0.875rem", fontWeight: "600" }}>
-                            Tool
-                        </label>
-                        <div className="d-flex flex-row gap-2">
-                            <select
-                                className="form-select form-select-sm"
-                                value={tool}
-                                onChange={(event) => onToolChange(event.target.value)}
-                            >
-                                <option value="draw-walls">Draw Walls</option>
-                                <option value="move-start">Move Start</option>
-                                <option value="move-end">Move End</option>
-                            </select>
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary btn-sm"
-                                onClick={() => onEraseWalls()}
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                data-bs-title="Clear walls"
-                            >
-                                <Eraser />
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-outline-secondary btn-sm"
-                                onClick={() => onClearPath()}
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                data-bs-title="Clear visited"
-                            >
-                                <RouteOff />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="form-label mb-2" style={{ fontSize: "0.875rem", fontWeight: "600" }}>
-                            Speed
-                        </label>
-                        <select
-                            className="form-select form-select-sm"
-                            value={speed}
-                            onChange={(event) => onSpeedChange(event.target.value)}
-                        >
-                            <option value={SPEED.SLOW}>Slow</option>
-                            <option value={SPEED.NORMAL}>Normal</option>
-                            <option value={SPEED.FAST}>Fast</option>
-                        </select>
-                    </div>
-
-                    <div className="d-flex gap-2">
-                        <button className="btn btn-primary btn-sm flex-grow-1" onClick={() => onRun(grid, start, end)}>Run</button>
-                        <button className="btn btn-danger btn-sm flex-grow-1" onClick={() => onReset()}>Reset</button>
-                    </div>
-                </>
+        <>
+            <div className="sidebar-header">
+                <span className="sidebar-header-title">Controls</span>
+                <button
+                    className="btn-icon"
+                    onClick={toggleCollapse}
+                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                    {isCollapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+                </button>
+            </div>
+            {!isCollapsed && (
+                <div className="sidebar-content">
+                    <ToolboxBody
+                        algorithm={algorithm} onAlgorithmChange={onAlgorithmChange}
+                        tool={tool} onToolChange={onToolChange}
+                        speed={speed} speedIndex={speedIndex} speedLabels={speedLabels}
+                        onSpeedSlider={handleSpeedSlider}
+                        onEraseWalls={onEraseWalls} onClearPath={onClearPath}
+                        onRun={onRun} onReset={onReset}
+                        gridRef={gridRef} start={start} end={end}
+                    />
+                </div>
             )}
-        </div>
+        </>
+    );
+}
+
+function ToolboxBody({
+    algorithm, onAlgorithmChange,
+    tool, onToolChange,
+    speed, speedIndex, speedLabels, onSpeedSlider,
+    onEraseWalls, onClearPath,
+    onRun, onReset,
+    gridRef, start, end,
+}) {
+    return (
+        <>
+            {/* Algorithm Selection */}
+            <div className="sidebar-section">
+                <div className="sidebar-section-label">Algorithm</div>
+                <div className="tool-options">
+                    {ALGORITHM_OPTIONS.map(opt => (
+                        <button
+                            key={opt.value}
+                            className={`tool-option ${algorithm === opt.value ? "active" : ""}`}
+                            onClick={() => onAlgorithmChange(opt.value)}
+                        >
+                            <Layers size={14} className="tool-option-icon" />
+                            <span>{opt.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Tool Selection */}
+            <div className="sidebar-section">
+                <div className="sidebar-section-label">Drawing Tool</div>
+                <div className="tool-options">
+                    {TOOL_OPTIONS.map(opt => {
+                        const Icon = opt.icon;
+                        return (
+                            <button
+                                key={opt.value}
+                                className={`tool-option ${tool === opt.value ? "active" : ""}`}
+                                onClick={() => onToolChange(opt.value)}
+                            >
+                                <Icon size={14} className="tool-option-icon" />
+                                <span>{opt.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+                <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                    <button
+                        className="btn btn-outline-secondary btn-sm flex-grow-1"
+                        onClick={onEraseWalls}
+                        title="Clear all walls"
+                    >
+                        <Eraser size={13} style={{ marginRight: "5px" }} />
+                        Clear Walls
+                    </button>
+                    <button
+                        className="btn btn-outline-secondary btn-sm flex-grow-1"
+                        onClick={onClearPath}
+                        title="Clear visited cells"
+                    >
+                        <RouteOff size={13} style={{ marginRight: "5px" }} />
+                        Clear Path
+                    </button>
+                </div>
+            </div>
+
+            {/* Speed */}
+            <div className="sidebar-section">
+                <div className="sidebar-section-label">Visualization Speed</div>
+                <div className="speed-control">
+                    <input
+                        type="range"
+                        min="0"
+                        max="2"
+                        step="1"
+                        value={speedIndex === -1 ? 1 : speedIndex}
+                        onChange={onSpeedSlider}
+                    />
+                    <div className="speed-labels">
+                        <span>Slow</span>
+                        <span style={{ color: "var(--text-dim)", fontWeight: 600 }}>
+                            {speedLabels[speed] || "Normal"}
+                        </span>
+                        <span>Fast</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="sidebar-section">
+                <div className="sidebar-section-label">Actions</div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                        className="btn btn-primary btn-sm flex-grow-1"
+                        onClick={() => onRun(gridRef?.current, start, end)}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                    >
+                        <Play size={13} />
+                        Run
+                    </button>
+                    <button
+                        className="btn btn-danger btn-sm flex-grow-1"
+                        onClick={onReset}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                    >
+                        <RotateCcw size={13} />
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            {/* Legend */}
+            <div className="sidebar-section">
+                <div className="sidebar-section-label">Legend</div>
+                <div className="legend">
+                    {LEGEND_ITEMS.map(item => (
+                        <div key={item.label} className="legend-item">
+                            <div
+                                className="legend-swatch"
+                                style={{ backgroundColor: item.color, border: "1px solid rgba(255,255,255,0.08)" }}
+                            />
+                            <span>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </>
     );
 }
