@@ -159,7 +159,25 @@ export default function PathfindingCanvas() {
       const [steps, path] = depthFirstSearch(grid, start, end);
       visualizeAlgorithm(steps, path, grid);
     }
-  }
+  };
+
+  const zoom_percent = `${Math.round(zoom * 100)}%`;
+
+  // In fullscreen, use floating toolbox; on mobile, draw-er style sidebar.
+  const showSidebar = !isFullscreen && !isMobile;
+  const showMobileSidebar = !isFullscreen && isMobile;
+
+  const toolboxProps = {
+    algorithm, onAlgorithmChange: setAlgorithm,
+    tool, onToolChange: setTool,
+    speed, onSpeedChange: setSpeed,
+    onEraseWalls: handleClearWalls,
+    onClearPath: handleClearPath,
+    onRun: handleRun,
+    onReset: resetCanvas,
+    gridRef: grid_ref,
+    start, end,
+  };
 
   return (
     <div style={style}>
