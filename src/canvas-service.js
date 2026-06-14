@@ -1,4 +1,3 @@
-import { breadthFirstSearch } from "./algorithms-service.js";
 import { ROWS, START, PATH, END, VISITED, COLS, COLORS, WALL, EMPTY } from "./canvas-config.js";
 
 const inBounds = (row, col) => row >= 0 && row < ROWS && col >= 0 && col < COLS;
