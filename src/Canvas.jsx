@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import ToolBox from "./ToolBox.jsx";
 import { breadthFirstSearch, depthFirstSearch } from "./algorithms-service.js";
-import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, COLORS, createGrid } from "./canvas-config.js";
+import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, SPEED, createGrid } from "./canvas-config.js";
 import { END_COORDINATE, START_COORDINATE } from "./canvas-config.js";
 import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll, clearVisited } from "./canvas-service.js";
 
@@ -18,7 +18,7 @@ export default function PathfindingCanvas({ style }) {
 
   const [algorithm, setAlgorithm] = useState("BFS");
   const [tool, setTool] = useState("draw-walls");
-  const [speed, setSpeed] = useState("normal");
+  const [speed, setSpeed] = useState(SPEED.NORMAL);
 
   // clear all walls from the grid
   const handleClearWalls = () => {
@@ -133,8 +133,6 @@ export default function PathfindingCanvas({ style }) {
   };
 
   const visualizeAlgorithm = (steps, path, grid) => {
-    let delay = 6000;
-
     const renderVisited = setInterval(() => {
       if (steps.length === 0) {
         clearInterval(renderVisited);
@@ -145,7 +143,7 @@ export default function PathfindingCanvas({ style }) {
         grid[row][col] = VISITED;
         draw();
       }
-    }, delay / steps.length);
+    }, speed);
 
     if (path.length  === 0){
       running.current = false;
@@ -164,7 +162,7 @@ export default function PathfindingCanvas({ style }) {
         grid[row][col] = PATH;
         draw();
       }
-    }, delay / path.length);
+    }, speed);
   }
 
   const handleRun = () => {
