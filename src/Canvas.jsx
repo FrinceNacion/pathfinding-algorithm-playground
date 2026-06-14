@@ -22,15 +22,157 @@ export default function PathfindingCanvas() {
   const painting = useRef(false);
   const paint_value = useRef(WALL);
   const running = useRef(false);
+  const workspace_ref = useRef(null);
+  const viewport_ref = useRef(null);
+  const splitter_ref = useRef(null);
+  const app_root_ref = useRef(null);
+  const is_splitter_dragging = useRef(false);
 
   const [start, setStart] = useState(START_COORDINATE);
   const [end, setEnd] = useState(END_COORDINATE);
-
   const [algorithm, setAlgorithm] = useState("BFS");
   const [tool, setTool] = useState("draw-walls");
   const [speed, setSpeed] = useState(SPEED.NORMAL);
 
-  // clear all walls from the grid
+  // Layout state
+  const [zoom, setZoom] = useState(ZOOM_DEFAULT);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [showFloatingToolbox, setShowFloatingToolbox] = useState(true);
+  // Lazy-init isMobile so we don't call setState inside an effect body
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia("(max-width: 900px)").matches
+  );
+
+  // Detect mobile/tablet breakpoint changes
+  useEffect(() => {
+    const media_query = window.matchMedia("(max-width: 900px)");
+    const listener = (e) => setIsMobile(e.matches);
+    media_query.addEventListener("change", listener);
+    return () => media_query.removeEventListener("change", listener);
+  }, []);
+
+  const draw = useCallback(() => {
+    drawCanvas(canvas_ref.current, grid_ref.current, cell_size.current, start, end);
+  }, [start, end]);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvas_ref.current;
+    const viewport = viewport_ref.current;
+    if (!canvas || !viewport) return;
+
+    const available_width = viewport.clientWidth;
+    const available_height = viewport.clientHeight;
+
+    const aspect = ROWS / COLS;
+    let base_width = available_width;
+    let base_height = Math.round(base_width * aspect);
+
+    if (base_height > available_height) {
+      base_height = available_height;
+      base_width = Math.round(base_height / aspect);
+    }
+
+    canvas.width = base_width;
+    canvas.height = base_height;
+    cell_size.current = { width: base_width / COLS, height: base_height / ROWS };
+    draw();
+  }, [draw]);
+
+  // Observe the viewport element for size changes
+  useEffect(() => {
+    const viewport = viewport_ref.current;
+    if (!viewport) return;
+    const resize_observer = new ResizeObserver(() => resizeCanvas());
+    resize_observer.observe(viewport);
+    resizeCanvas();
+    return () => resize_observer.disconnect();
+  }, [resizeCanvas]);
+
+  // zoom helpers
+  const clampZoom = (val) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(val * 100) / 100));
+
+  const handleZoomIn = () => setZoom(z => clampZoom(z + ZOOM_STEP));
+  const handleZoomOut = () => setZoom(z => clampZoom(z - ZOOM_STEP));
+  const handleZoomReset = () => setZoom(ZOOM_DEFAULT);
+
+  // Mouse-wheel zoom on the viewport
+  useEffect(() => {
+    const viewport = viewport_ref.current;
+    if (!viewport) return;
+    const onWheel = (event) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      setZoom(zoom => clampZoom(zoom - Math.sign(event.deltaY) * ZOOM_STEP));
+    };
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+    return () => viewport.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Fullscreen
+  const handleToggleFullscreen = useCallback(() => {
+    const element = document.documentElement;
+    if (!document.fullscreenElement) {
+      element.requestFullscreen?.().catch(() => { });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.().catch(() => { });
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  // Sidebar splitter drag
+  useEffect(() => {
+    const splitter = splitter_ref.current;
+    if (!splitter) return;
+
+    const onMouseDown = (e) => {
+      e.preventDefault();
+      is_splitter_dragging.current = true;
+      splitter.classList.add("is-dragging");
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    };
+
+    const onMouseMove = (e) => {
+      if (!is_splitter_dragging.current) return;
+      const app_root = app_root_ref.current;
+      if (!app_root) return;
+      const rect = app_root.getBoundingClientRect();
+      const new_sidebar_width = rect.right - e.clientX;
+      const clamped = Math.min(400, Math.max(240, new_sidebar_width));
+      setSidebarWidth(clamped);
+    };
+
+    const onMouseUp = () => {
+      if (!is_splitter_dragging.current) return;
+      is_splitter_dragging.current = false;
+      splitter.classList.remove("is-dragging");
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    splitter.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      splitter.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  // Grid operations
   const handleClearWalls = () => {
     if (running.current) return;
     clearWalls(grid_ref.current);
