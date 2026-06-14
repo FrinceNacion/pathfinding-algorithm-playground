@@ -1,5 +1,5 @@
 import { inBounds } from "./canvas-service";
-import { ROWS, COLS, WALL, VISITED } from "./canvas-config.js";
+import { ROWS, COLS, WALL } from "./canvas-config.js";
 
 // get Neighbors of a cell that are not walls and are within bounds
 const getNeighbors = (row, col, grid) => {
