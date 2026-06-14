@@ -4,6 +4,16 @@ import { breadthFirstSearch, depthFirstSearch } from "./algorithms-service.js";
 import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, SPEED, createGrid } from "./canvas-config.js";
 import { END_COORDINATE, START_COORDINATE } from "./canvas-config.js";
 import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll, clearVisited } from "./canvas-service.js";
+import {
+  ZoomIn, ZoomOut, Maximize2, Minimize2, SidebarOpen, SidebarClose,
+  PanelRight, PanelRightClose,
+} from "lucide-react";
+
+const ZOOM_STEP = 0.1;
+const ZOOM_MIN = 0.4;
+const ZOOM_MAX = 2.5;
+const ZOOM_DEFAULT = 1.0;
+const SIDEBAR_DEFAULT_WIDTH = 300;
 
 export default function PathfindingCanvas() {
   const canvas_ref = useRef(null);
