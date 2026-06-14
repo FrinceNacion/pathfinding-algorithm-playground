@@ -4,7 +4,26 @@ import {
     Pencil, MapPin, Flag, X, Layers
 } from 'lucide-react';
 import { SPEED } from "./canvas-config";
-import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
+
+const TOOL_OPTIONS = [
+    { value: "draw-walls", label: "Draw Walls", icon: Pencil },
+    { value: "move-start", label: "Move Start", icon: Flag },
+    { value: "move-end", label: "Move End", icon: MapPin },
+];
+
+const ALGORITHM_OPTIONS = [
+    { value: "BFS", label: "Breadth-First Search", short: "BFS" },
+    { value: "DFS", label: "Depth-First Search", short: "DFS" },
+];
+
+const LEGEND_ITEMS = [
+    { color: "#22c55e", label: "Start node" },
+    { color: "#ef4444", label: "End node" },
+    { color: "#0f3c65", label: "Wall" },
+    { color: "#bfdbfe", label: "Visited" },
+    { color: "#fbbf24", label: "Shortest path" },
+    { color: "#f8f9fa", label: "Empty cell" },
+];
 
 export default function ToolBox({
     grid, start, end,
