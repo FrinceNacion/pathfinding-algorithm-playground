@@ -26,11 +26,16 @@ const LEGEND_ITEMS = [
 ];
 
 export default function ToolBox({
-    grid, start, end,
+    gridRef, start, end,
     algorithm, onAlgorithmChange,
     tool, onToolChange,
     speed, onSpeedChange,
     onEraseWalls, onClearPath, onRun, onReset,
+    // Layout props
+    isFloating = false,
+    isCollapsed = false,
+    onToggleCollapse,
+    onClose,
 }) {
     const [isMinimized, setIsMinimized] = useState(false);
 
