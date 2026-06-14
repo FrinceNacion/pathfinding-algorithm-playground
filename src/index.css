@@ -1,14 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg-page: #f8f9fa;
-    --bg-surface: #ffffff;
-    --text-main: #111827;
-    --text-muted: #6b7280;
-    --border: #e5e7eb;
-    --primary: #111827;
-    --primary-hover: #334155;
-    --shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+    /* Color palette */
+    --bg-page: #0f1117;
+    --bg-surface: #1a1d27;
+    --bg-surface-2: #22263a;
+    --bg-surface-3: #2a2f45;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-active: rgb(59, 104, 66, 0.5); /*  rgba(99, 102, 241, 0.5)*/
+    --text-main: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --text-light: #d2db76;
+    --primary: #3b6842;
+    --primary-hover: #7d985e;
+    --primary-glow: rgb(125, 152, 94, 0.3); /* #7d985e */
+    --danger: #ef4444;
+    --danger-hover: #f87171;
+    --success: #22c55e;
+    --accent: #f59e0b;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    --shadow-glow: 0 0 24px rgba(99,102,241,0.2);
+
+    /* Sidebar */
+    --sidebar-width: 300px;
+    --sidebar-min-width: 240px;
+    --sidebar-max-width: 400px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-med: 0.25s ease;
+    --transition-slow: 0.35s ease;
 }
 
 * {
