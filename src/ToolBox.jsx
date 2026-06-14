@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
-import { Eraser, ChevronUp, Menu, RouteOff } from 'lucide-react';
+import { useState } from "react";
+import {
+    Eraser, RouteOff, Play, RotateCcw, ChevronLeft, ChevronRight,
+    Pencil, MapPin, Flag, X, Layers
+} from 'lucide-react';
 import { SPEED } from "./canvas-config";
 import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
