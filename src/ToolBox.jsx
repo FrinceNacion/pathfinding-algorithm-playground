@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Eraser, ChevronUp, Menu, RouteOff } from 'lucide-react';
+import { SPEED } from "./canvas-config";
 import * as bootstrap from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 export default function ToolBox({
@@ -100,9 +101,9 @@ export default function ToolBox({
                             value={speed}
                             onChange={(event) => onSpeedChange(event.target.value)}
                         >
-                            <option value="slow">Slow</option>
-                            <option value="normal">Normal</option>
-                            <option value="fast">Fast</option>
+                            <option value={SPEED.SLOW}>Slow</option>
+                            <option value={SPEED.NORMAL}>Normal</option>
+                            <option value={SPEED.FAST}>Fast</option>
                         </select>
                     </div>
 
