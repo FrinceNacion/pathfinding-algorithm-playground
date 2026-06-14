@@ -110,8 +110,19 @@ export default function PathfindingCanvas() {
     }
   };
 
-  const handleMouseUp = () => {
-    painting.current = false;
+  const handleMouseUp = () => { painting.current = false; };
+
+  // Touch support for mobile
+  const handleTouchStart = (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+  };
+
+  const handleTouchMove = (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
   };
 
   const visualizeAlgorithm = (steps, path, grid) => {
