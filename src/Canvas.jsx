@@ -55,30 +55,9 @@ export default function PathfindingCanvas() {
     draw();
   };
 
-  const draw = useCallback(() => {
-    drawCanvas(canvas_ref.current, grid_ref.current, cell_size.current, start, end);
-  }, [start, end]);
-
-  // resize canvas to fit parent and calculate cell size
-  useEffect(() => {
-    const canvas = canvas_ref.current;
-    const resize = () => {
-      const width = canvas.parentElement.clientWidth;
-      const height = Math.round(width * ROWS / COLS);
-      canvas.width = width;
-      canvas.height = height;
-      cell_size.current = { width: width / COLS, height: height / ROWS }; // cleanup, calculate cell size only on resize
-      draw();
-    };
-    resize();
-    const resize_observer = new ResizeObserver(resize);
-    resize_observer.observe(canvas.parentElement);
-    return () => resize_observer.disconnect();
-  }, [draw]);
-
+  // Canvas interaction handlers (mouse)
   const handleMouseDown = (event) => {
-    if (running.current) return; // prevent editing while algorithm is running
-
+    if (running.current) return;
     const { row, col } = cellFromEvent(event, canvas_ref.current, cell_size.current);
     if (!inBounds(row, col)) return;
 
@@ -91,15 +70,15 @@ export default function PathfindingCanvas() {
       draw();
     } else if (tool === "move-start") {
       if (row === end.row && col === end.col) return;
-      grid_ref.current[previous_start_coordinate.row][previous_start_coordinate.col] = EMPTY;
+      grid_ref.current[start.row][start.col] = EMPTY;
       grid_ref.current[row][col] = START;
       setStart({ row, col });
       draw();
-      painting.current = "move-start"; // special marker to enable dragging
+      painting.current = "move-start";
     } else if (tool === "move-end") {
       if (row === start.row && col === start.col) return;
-      grid_ref.current[previous_end_coordinate.row][previous_end_coordinate.col] = EMPTY; // remove old end
-      grid_ref.current[row][col] = END; // set new end
+      grid_ref.current[end.row][end.col] = EMPTY;
+      grid_ref.current[row][col] = END;
       setEnd({ row, col });
       draw();
       painting.current = "move-end";
@@ -118,13 +97,13 @@ export default function PathfindingCanvas() {
       draw();
     } else if (painting.current === "move-start") {
       if (row === end.row && col === end.col) return;
-      grid_ref.current[previous_start_coordinate.row][previous_start_coordinate.col] = EMPTY;
+      grid_ref.current[start.row][start.col] = EMPTY;
       grid_ref.current[row][col] = START;
       setStart({ row, col });
       draw();
     } else if (painting.current === "move-end") {
       if (row === start.row && col === start.col) return;
-      grid_ref.current[previous_end_coordinate.row][previous_end_coordinate.col] = EMPTY;
+      grid_ref.current[end.row][end.col] = EMPTY;
       grid_ref.current[row][col] = END;
       setEnd({ row, col });
       draw();
