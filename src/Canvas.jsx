@@ -5,7 +5,7 @@ import { COLS, ROWS, EMPTY, WALL, START, END, VISITED, PATH, SPEED, createGrid }
 import { END_COORDINATE, START_COORDINATE } from "./canvas-config.js";
 import { inBounds, drawCanvas, cellFromEvent, clearWalls, clearAll, clearVisited } from "./canvas-service.js";
 
-export default function PathfindingCanvas({ style }) {
+export default function PathfindingCanvas() {
   const canvas_ref = useRef(null);
   const grid_ref = useRef(createGrid());
   const cell_size = useRef({ width: 0, height: 0 });
