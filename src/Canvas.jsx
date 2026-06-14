@@ -90,8 +90,6 @@ export default function PathfindingCanvas() {
       grid_ref.current[row][col] = paint_value.current;
       draw();
     } else if (tool === "move-start") {
-      // move start immediately and begin dragging
-      const previous_start_coordinate = start;
       if (row === end.row && col === end.col) return;
       grid_ref.current[previous_start_coordinate.row][previous_start_coordinate.col] = EMPTY;
       grid_ref.current[row][col] = START;
@@ -99,7 +97,6 @@ export default function PathfindingCanvas() {
       draw();
       painting.current = "move-start"; // special marker to enable dragging
     } else if (tool === "move-end") {
-      const previous_end_coordinate = end;
       if (row === start.row && col === start.col) return;
       grid_ref.current[previous_end_coordinate.row][previous_end_coordinate.col] = EMPTY; // remove old end
       grid_ref.current[row][col] = END; // set new end
@@ -115,21 +112,17 @@ export default function PathfindingCanvas() {
     if (!inBounds(row, col)) return;
 
     if (painting.current === true) {
-      // drawing walls mode
       const cell = grid_ref.current[row][col];
       if (cell === START || cell === END) return;
       grid_ref.current[row][col] = paint_value.current;
       draw();
     } else if (painting.current === "move-start") {
-      // update start while dragging
-      const previous_start_coordinate = start;
       if (row === end.row && col === end.col) return;
       grid_ref.current[previous_start_coordinate.row][previous_start_coordinate.col] = EMPTY;
       grid_ref.current[row][col] = START;
       setStart({ row, col });
       draw();
     } else if (painting.current === "move-end") {
-      const previous_end_coordinate = end;
       if (row === start.row && col === start.col) return;
       grid_ref.current[previous_end_coordinate.row][previous_end_coordinate.col] = EMPTY;
       grid_ref.current[row][col] = END;
@@ -179,14 +172,11 @@ export default function PathfindingCanvas() {
     if (running.current) return;
     running.current = true;
     const grid = grid_ref.current;
-
     if (algorithm === "BFS") {
       const [steps, path] = breadthFirstSearch(grid, start, end);
-
       visualizeAlgorithm(steps, path, grid);
     } else if (algorithm === "DFS") {
       const [steps, path] = depthFirstSearch(grid, start, end);
-      
       visualizeAlgorithm(steps, path, grid);
     }
   }
