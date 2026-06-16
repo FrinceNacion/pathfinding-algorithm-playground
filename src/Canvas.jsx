@@ -280,11 +280,20 @@ export default function PathfindingCanvas() {
       }
     }, speed);
 
-    if (path.length === 0) { running.current = false; return; }
+    if (path.length === 0) {
+      running.current = false;
+      setIsDisplayResult(true);
+      return;
+    }
 
     const renderPath = setInterval(() => {
       if (steps.length > 0) return;
-      if (path.length === 0) { clearInterval(renderPath); running.current = false; return; }
+      if (path.length === 0) {
+        clearInterval(renderPath);
+        running.current = false;
+        setIsDisplayResult(true);
+        return;
+      }
       const [row, col] = path.shift().split(",").map(Number);
       if (grid[row][col] !== START && grid[row][col] !== END) {
         grid[row][col] = PATH;
