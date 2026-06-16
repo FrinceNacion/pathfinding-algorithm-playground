@@ -191,6 +191,7 @@ export default function PathfindingCanvas() {
   const resetCanvas = () => {
     if (running.current) return;
     clearAll(grid_ref.current, start, end);
+    setIsDisplayResult(false);
     grid_ref.current[start.row][start.col] = EMPTY;
     grid_ref.current[end.row][end.col] = EMPTY;
     grid_ref.current[12][4] = START;
@@ -305,6 +306,8 @@ export default function PathfindingCanvas() {
   const handleRun = () => {
     if (running.current) return;
     running.current = true;
+    clearVisited(grid_ref.current);
+    draw();
     const grid = grid_ref.current;
     if (algorithm === "BFS") {
       const [steps, path] = breadthFirstSearch(grid, start, end);
