@@ -162,6 +162,36 @@ body {
     box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
 }
 
+.result-container {
+    position: absolute;
+    top: 64px;
+    left: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 16px;
+    align-items: center;
+    gap: 6px;
+    z-index: 100;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 8px;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(12px); 
+}
+
+.result-container p {
+    color: var(--text-muted);
+}
+
+.result-container .vc-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 2px;
+}
+
+
 .viewport-controls {
     position: absolute;
     bottom: 16px;
