@@ -310,11 +310,15 @@ export default function PathfindingCanvas() {
     draw();
     const grid = grid_ref.current;
     if (algorithm === "BFS") {
-      const [steps, path] = breadthFirstSearch(grid, start, end);
-      visualizeAlgorithm(steps, path, grid);
+      const [calculated_steps, calculated_path] = breadthFirstSearch(grid, start, end);
+      setSteps([...calculated_steps]);
+      setPath([...calculated_path]);
+      visualizeAlgorithm(calculated_steps, calculated_path, grid);
     } else if (algorithm === "DFS") {
-      const [steps, path] = depthFirstSearch(grid, start, end);
-      visualizeAlgorithm(steps, path, grid);
+      const [calculated_steps, calculated_path] = depthFirstSearch(grid, start, end);
+      setSteps([...calculated_steps]);
+      setPath([...calculated_path]);
+      visualizeAlgorithm(calculated_steps, calculated_path, grid);
     }
   };
 
