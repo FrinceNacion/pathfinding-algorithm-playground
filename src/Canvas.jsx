@@ -33,6 +33,9 @@ export default function PathfindingCanvas() {
   const [algorithm, setAlgorithm] = useState("BFS");
   const [tool, setTool] = useState("draw-walls");
   const [speed, setSpeed] = useState(SPEED.NORMAL);
+  const [isDisplayResult, setIsDisplayResult] = useState(false);
+  const [steps, setSteps] = useState([]);
+  const [path, setPath] = useState([]);
 
   // Layout state
   const [zoom, setZoom] = useState(ZOOM_DEFAULT);
