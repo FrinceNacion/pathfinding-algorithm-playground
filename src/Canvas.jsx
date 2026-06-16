@@ -398,6 +398,22 @@ export default function PathfindingCanvas() {
           </div>
         </div>
 
+        {isDisplayResult && (
+          <div className="result-container">
+            <div className="d-flex flex-row gap-2">
+              <p className="m-0">Visited cells: {steps.length}</p>
+              <div className="vc-divider" />
+            </div>
+            <div className="d-flex flex-row gap-2">
+              <p className="m-0">Path length: {path.length}</p>
+              <div className="vc-divider" />
+            </div>
+            <div>
+              <p className="m-0">algorithm: {algorithm}</p>
+            </div>
+          </div>
+        )}
+
         <div className="viewport-controls">
           <button className="vc-btn" onClick={handleZoomOut} title="Zoom out (Ctrl + Scroll)">
             <ZoomOut size={14} />
